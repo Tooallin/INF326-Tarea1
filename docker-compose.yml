@@ -1,0 +1,88 @@
+services:
+  loki:
+    image: grafana/loki:2.9.8
+    command: -config.file=/etc/loki/loki-config.yml
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./loki/loki-config.yml:/etc/loki/loki-config.yml:ro
+      - loki-data:/loki
+    networks: [observability]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3100/ready"]
+      interval: 10s
+      timeout: 3s
+      retries: 15
+
+  promtail:
+    image: grafana/promtail:2.9.8
+    command: -config.file=/etc/promtail/promtail-config.yml
+    volumes:
+      - ./promtail/promtail-config.yml:/etc/promtail/promtail-config.yml:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro   # <-- solo socket
+    depends_on:
+      loki:
+        condition: service_healthy
+    networks: [observability]
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:11.0.0
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+      - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards # opcional
+      - ./grafana/dashboards:/var/lib/grafana/dashboards                       # opcional
+    depends_on:
+      loki:
+        condition: service_healthy
+    networks: [observability]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 15
+
+  svc-a:
+    build: ./svc-a
+    container_name: svc-a
+    environment:
+      - SERVICE_NAME=svc-a
+      - LOG_LEVEL=INFO
+    ports:
+      - "8001:8000"
+    depends_on:
+      promtail:
+        condition: service_started
+    networks: [observability]
+    restart: unless-stopped
+
+  svc-b:
+    build: ./svc-b
+    container_name: svc-b
+    environment:
+      - SERVICE_NAME=svc-b
+      - LOG_LEVEL=INFO
+    ports:
+      - "8002:8000"
+    depends_on:
+      promtail:
+        condition: service_started
+    networks: [observability]
+    restart: unless-stopped
+
+volumes:
+  loki-data:
+  grafana-data:
+
+networks:
+  observability:
+    driver: bridge

@@ -1,33 +1,54 @@
+#Desactiva la autenticación de Loki, cualquier cliente puede leer/escribir logs
 auth_enabled: false
 
+#Configura el puerto HTTP en el que Loki estara escuchando
 server:
   http_listen_port: 3100
 
 common:
+  #Dirección interna de la instancia
   instance_addr: 127.0.0.1
+  #Carpeta base para los datos de Loki dentro del contenedor
   path_prefix: /loki
+  #Almacenamiento de Loki
   storage:
     filesystem:
+      #Almacenamiento de chunks (fragmentos de logs procesados)
       chunks_directory: /loki/chunks
+      #Almacenamiento de reglas
       rules_directory: /loki/rules
+  #Se almacena solo una copia de los datos
   replication_factor: 1
+  #Mecanismo de descubrimiento de nodos y distribucion de datos
   ring:
     kvstore:
       store: memberlist
 
+#Compactor que reduce y organiza datos antiguos para optimizar espacio
 compactor:
+  #Carpeta donde hace el trabajo temporal
   working_directory: /loki/compactor
+  #Utiliza almacenamiento local
   shared_store: filesystem
 
+#Configuración del esquema
 schema_config:
   configs:
+    #Fecha desde la que es valida la configuracion
     - from: 2024-01-01
+      #Formato de almacenamiento
       store: tsdb
+      #Guarda los datos en disco local
       object_store: filesystem
+      #Version del esquema de Loki
       schema: v13
       index:
+        #Prefijo para archivos de indice
         prefix: index_
+        #Crea un indice nuevo cada dia
         period: 24h
 
+#Configura el Ruler de Loki que evalua reglas y dispara alertas
 ruler:
+  #Dirección del Alertmanager
   alertmanager_url: http://localhost:9093

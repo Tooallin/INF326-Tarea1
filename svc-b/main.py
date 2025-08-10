@@ -2,7 +2,7 @@ from fastapi import FastAPI
 import logging
 import os
 import time
-from random import random
+from random import randint
 
 app = FastAPI(title="svc-b")
 
@@ -12,12 +12,13 @@ logger = logging.getLogger("svc-b")
 
 @app.get("/ping")
 def ping():
-	logger.info("svc-b ping ok")
+	logger.info("[SVC-B] Ping recibido")
 	return {"svc": "b", "status": "ok"}
 
-@app.get("/compute")
-def compute():
-	logger.info("svc-b compute start")
-	time.sleep(0.2 + random())
-	logger.warning("svc-b aviso: operación costosa")
-	return {"svc":"b","result":42}
+@app.get("/work")
+def work():
+	duration = randint(50, 250) / 1000
+	logger.info("[SVC-B] Inicia trabajo")
+	time.sleep(duration)
+	logger.info(f"[SVC-B] Trabajo completado tras: {int(duration*1000)} ms")
+	return {"svc":"b", "work": "done"}	

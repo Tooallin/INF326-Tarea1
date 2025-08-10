@@ -1,10 +1,18 @@
+#Version del esquema de configuracion
 apiVersion: 1
 
+#Lista de fuentes de datos que Grafana debe configurar al iniciar
 datasources:
+  #Nombre visible en Grafana para la fuente de datos
   - name: Loki
+    #Tipo de datasource
     type: loki
+    #Como Grafana se conecta con Loki
     access: proxy
+    #Direccion de acceso a Loki
     url: http://loki:3100
+    #Define que sera la fuente de datos predeterminada de Grafana
     isDefault: true
     jsonData:
+      #Limite maximo de lineas de log que se pueden recuperar en una consulta
       maxLines: 5000

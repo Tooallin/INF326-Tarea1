@@ -1,20 +1,32 @@
+#Configuración del servidor
 server:
+  #Puerto donde Promtail expone metricas y estado
   http_listen_port: 9080
+  #Deshabilita el servidor gRPC
   grpc_listen_port: 0
 
+#Lista de destinos donde Promtail envia los logs
 clients:
+  #Direccion del servicio Loki
   - url: http://loki:3100/loki/api/v1/push
 
 positions:
+  #Archivo donde Promtail guarda el ultimo punto leido en cada log
   filename: /tmp/positions.yaml
 
+#Configuracion de que logs leer
 scrape_configs:
+  #Nombre del trabajo de scraping
   - job_name: docker
+    #Configuracion del Service Discovery de Docker
     docker_sd_configs:
+      #Socket de Docker para detectar los contenedores y sus logs
       - host: unix:///var/run/docker.sock
         refresh_interval: 5s
     pipeline_stages:
-      - docker: {}   # <- OBLIGATORIO el colon
+      #Docker stage formatea y limpia logs provenientes de contenedores Docker
+      - docker: {}
+    #Traduce metadatos de Docker a etiquetas mas legibles en Loki
     relabel_configs:
       - source_labels: ['__meta_docker_container_label_com_docker_compose_service']
         target_label: compose_service

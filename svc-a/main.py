@@ -12,16 +12,13 @@ logger = logging.getLogger("svc-a")
 
 @app.get("/ping")
 def ping():
-	logger.info("svc-a ping recibido")
+	logger.info("[SVC-A] Ping recibido")
 	return {"svc": "a", "status": "ok"}
 
 @app.get("/work")
 def work():
 	duration = randint(50, 250) / 1000
-	logger.info(f"svc-a inicia trabajo; duracion_esperada_ms={int(duration*1000)}")
+	logger.info("[SVC-A] Inicia trabajo")
 	time.sleep(duration)
-	if randint(0,9) == 0:
-		logger.error("svc-a error simulado en /work")
-		return {"svc":"a","ok":False}
-	logger.info("svc-a trabajo completado")
-	return {"svc":"a","ok":True}
+	logger.info(f"[SVC-A] Trabajo completado tras: {int(duration*1000)} ms")
+	return {"svc":"a", "work": "done"}

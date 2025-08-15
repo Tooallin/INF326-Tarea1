@@ -1,4 +1,5 @@
 # INF326-Tarea1
+Codigo disponible en el repositorio ``https://github.com/Tooallin/INF326-Tarea1``
 
 ## Levantamiento
 - Ejecutar el comando ``docker compose up -d --build``

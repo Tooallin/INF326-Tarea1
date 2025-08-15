@@ -57,6 +57,7 @@ services:
     environment:
       - SERVICE_NAME=svc-a
       - LOG_LEVEL=INFO
+      - SVC_B_URL=http://svc-b:8000
     ports:
       - "8001:8000"
     depends_on:
@@ -71,6 +72,7 @@ services:
     environment:
       - SERVICE_NAME=svc-b
       - LOG_LEVEL=INFO
+      - SVC_A_URL=http://svc-a:8000
     ports:
       - "8002:8000"
     depends_on:
